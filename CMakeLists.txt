@@ -8,4 +8,6 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_executable(binarization binarization_main.cpp)
 
-target_link_libraries(binarization ${OpenCV_LIBS})
+target_link_libraries(binarization ${OpenCV_LIBS} IMAGE_PROCESSING)
+
+add_subdirectory(image_processing)
