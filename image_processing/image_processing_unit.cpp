@@ -122,3 +122,29 @@ void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds) {
   }
   thresholds = all_possible_thresholds[best_id];
 }
+
+void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
+                                       cv::Mat& gray_img, cv::Mat& bin_img) {
+  gray_img.copyTo(bin_img);
+
+  for (size_t y = 0; y < gray_img.rows; y++) {
+    std::cout << std::endl;
+    for (size_t x = 0; x < gray_img.cols; x++) {
+      int start = 0;
+      int end = 0;
+      std::cout << (int)gray_img.at<uchar>(y, x) << " ";
+      for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+        if (thresholds.size() == cl_id)
+          end = 255;
+        else
+          end = thresholds[cl_id];
+        if ((start <= gray_img.at<uchar>(y, x)) &&
+            (gray_img.at<uchar>(y, x) <= end)) {
+          bin_img.at<uchar>(y, x) = cl_id * static_cast<int>(255 / m_levels);
+        }
+        start = end;
+      }
+      // std::cout << bin_img.at<float>(y, x);
+    }
+  }
+}

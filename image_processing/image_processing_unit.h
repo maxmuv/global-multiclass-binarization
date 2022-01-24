@@ -6,7 +6,7 @@
 class ImageProcessingUnit {
  protected:
   ImageProcessingUnit(const cv::Mat& img, const int levels) : m_levels(levels) {
-    m_img = img.clone();
+    img.copyTo(m_img);
   }
   void UpdateImage(const cv::Mat& img) { m_img = img.clone(); }
 
@@ -25,6 +25,8 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
 
   void CreateNormHistogram();
   void SearchThresholds(std::vector<uchar>& thresholds);
+  void BinarizeImage(std::vector<uchar>& thresholds, cv::Mat& gray_img,
+                     cv::Mat& bin_img);
 
  private:
   void GenerateAllPossibleThresholds(
