@@ -9,7 +9,7 @@ class ImageProcessingUnit {
     img.copyTo(m_img);
   }
   void UpdateImage(const cv::Mat& img) { m_img = img.clone(); }
-
+  virtual void Process(cv::Mat& gray_img, cv::Mat& bin_img) = 0;
   cv::Mat m_img;
   const int m_levels;
 
@@ -23,6 +23,7 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
   MultiClassOtsuUnit(const cv::Mat& img, const int levels)
       : ImageProcessingUnit(img, levels) {}
 
+  void Process(cv::Mat& gray_img, cv::Mat& bin_img) override;
   void CreateNormHistogram();
   void SearchThresholds(std::vector<uchar>& thresholds);
   void BinarizeImage(std::vector<uchar>& thresholds, cv::Mat& gray_img,

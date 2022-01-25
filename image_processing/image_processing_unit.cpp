@@ -8,7 +8,6 @@ void MultiClassOtsuUnit::CreateNormHistogram() {
   bool uniform = true, accumulate = false;
   cv::calcHist(&m_img, 1, 0, cv::Mat(), m_hist, 1, &hist_size, hist_range,
                uniform, accumulate);
-  // ToDo: Make test for histogram
   double sum = 0.0;
   for (size_t i = 0; i < m_hist.rows; i++) {
     sum += m_hist.at<float>(i);
@@ -16,11 +15,6 @@ void MultiClassOtsuUnit::CreateNormHistogram() {
   for (size_t i = 0; i < m_hist.rows; i++) {
     m_hist.at<float>(i) /= sum;
   }
-  std::cout << "sum = " << sum << std::endl;
-  std::cout << "hist = " << std::endl
-            << " " << m_hist << std::endl
-            << std::endl;
-  std::cout << "size of hist =" << m_hist.size << std::endl;
 }
 
 void MultiClassOtsuUnit::GenerateAllPossibleThresholds(
@@ -103,13 +97,6 @@ void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds) {
   std::vector<uchar> thresholds_for_func(m_levels - 1);
   GenerateAllPossibleThresholds(all_possible_thresholds, thresholds_for_func,
                                 0);
-  for (const auto& thr : all_possible_thresholds) {
-    std::cout << "[ ";
-    for (const auto& one : thr) {
-      std::cout << (int)one << ", ";
-    }
-    std::cout << " ]" << std::endl;
-  }
   float min = 100000000.0;
   size_t best_id = 0;
   for (size_t t_id = 0; t_id < all_possible_thresholds.size(); t_id++) {
@@ -128,11 +115,9 @@ void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
   gray_img.copyTo(bin_img);
 
   for (size_t y = 0; y < gray_img.rows; y++) {
-    std::cout << std::endl;
     for (size_t x = 0; x < gray_img.cols; x++) {
       int start = 0;
       int end = 0;
-      std::cout << (int)gray_img.at<uchar>(y, x) << " ";
       for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
         if (thresholds.size() == cl_id)
           end = 255;
@@ -144,7 +129,13 @@ void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
         }
         start = end;
       }
-      // std::cout << bin_img.at<float>(y, x);
     }
   }
+}
+
+void MultiClassOtsuUnit::Process(cv::Mat& gray_img, cv::Mat& bin_img) {
+  CreateNormHistogram();
+  std::vector<uchar> thrs;
+  SearchThresholds(thrs);
+  BinarizeImage(thrs, gray_img, bin_img);
 }
