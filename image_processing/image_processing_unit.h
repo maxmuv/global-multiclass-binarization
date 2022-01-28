@@ -25,7 +25,7 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
 
   void Process(cv::Mat& gray_img, cv::Mat& bin_img) override;
   void CreateNormHistogram();
-  void SearchThresholds(std::vector<uchar>& thresholds);
+  void SearchThresholds(std::vector<uchar>& thresholds, double& res_var);
   void BinarizeImage(std::vector<uchar>& thresholds, cv::Mat& gray_img,
                      cv::Mat& bin_img);
 
@@ -36,6 +36,7 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
   void CalculateIntroClassVariance(float& var,
                                    const std::vector<uchar>& cand_thresholds);
 
+ public:
   cv::Mat m_hist;
 };
 

@@ -36,30 +36,35 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   float i_var = 0.0;
 
   std::vector<float> prob_distr(m_levels);
-  uchar start = 0;
-  uchar end = 0;
-  for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+  int start = 0;
+  int end = 0;
+  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
-      end = 255;
+      end = 256;
     else
       end = cand_thresholds[cl_id];
     prob_distr[cl_id] = 0.0;
-    for (uchar j = start; j < end; j++) {
+    for (int j = start; j < end; j++) {
       prob_distr[cl_id] += m_hist.at<float>(j);
     }
     start = end;
   }
+  float sum = 0.0;
+  for (const auto prob : prob_distr) {
+    sum += prob;
+  }
+  assert(fabs(1.0f - sum) < 0.000001f);
 
   start = 0;
   end = 0;
   std::vector<float> means(m_levels);
-  for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
-      end = 255;
+      end = 256;
     else
       end = cand_thresholds[cl_id];
     means[cl_id] = 0.0;
-    for (uchar j = start; j < end; j++) {
+    for (int j = start; j < end; j++) {
       means[cl_id] += (0 == prob_distr[cl_id])
                           ? 0
                           : j * m_hist.at<float>(j) / prob_distr[cl_id];
@@ -70,13 +75,13 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   start = 0;
   end = 0;
   std::vector<float> vars(m_levels);
-  for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
-      end = 255;
+      end = 256;
     else
       end = cand_thresholds[cl_id];
     vars[cl_id] = 0.0;
-    for (uchar j = start; j < end; j++) {
+    for (int j = start; j < end; j++) {
       vars[cl_id] += (0 == prob_distr[cl_id])
                          ? 0
                          : (j - means[cl_id]) * (j - means[cl_id]) *
@@ -85,14 +90,16 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
     start = end;
   }
 
-  for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
     i_var += prob_distr[cl_id] * vars[cl_id];
   }
 
   var = i_var;
 }
 
-void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds) {
+// ToDo: Check that hist exist
+void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds,
+                                          double& res_var) {
   std::vector<std::vector<uchar>> all_possible_thresholds;
   std::vector<uchar> thresholds_for_func(m_levels - 1);
   GenerateAllPossibleThresholds(all_possible_thresholds, thresholds_for_func,
@@ -108,6 +115,7 @@ void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds) {
     }
   }
   thresholds = all_possible_thresholds[best_id];
+  res_var = min;
 }
 
 void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
@@ -136,6 +144,7 @@ void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
 void MultiClassOtsuUnit::Process(cv::Mat& gray_img, cv::Mat& bin_img) {
   CreateNormHistogram();
   std::vector<uchar> thrs;
-  SearchThresholds(thrs);
+  double var;
+  SearchThresholds(thrs, var);
   BinarizeImage(thrs, gray_img, bin_img);
 }
