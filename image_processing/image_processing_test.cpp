@@ -38,12 +38,12 @@ TEST_CASE("3_2_levels_gray_image") {
   cv::Mat gray_img(height, width, CV_8UC1, cv::Scalar(0));
   for (int y = 0; y < gray_img.rows; ++y) {
     for (int x = 0; x < gray_img.cols; x += 6) {
-      gray_img.at<char>(y, x) = 0;
-      gray_img.at<char>(y, x + 1) = 1;
-      gray_img.at<char>(y, x + 2) = 2;
-      gray_img.at<char>(y, x + 3) = 253;
-      gray_img.at<char>(y, x + 4) = 254;
-      gray_img.at<char>(y, x + 5) = 255;
+      gray_img.at<uchar>(y, x) = 0u;
+      gray_img.at<uchar>(y, x + 1) = 1u;
+      gray_img.at<uchar>(y, x + 2) = 2u;
+      gray_img.at<uchar>(y, x + 3) = 253u;
+      gray_img.at<uchar>(y, x + 4) = 254u;
+      gray_img.at<uchar>(y, x + 5) = 255u;
     }
   }
   MultiClassOtsuUnit unit(gray_img, 2);
@@ -60,15 +60,15 @@ TEST_CASE("3_3_levels_gray_image") {
   cv::Mat gray_img(height, width, CV_8UC1, cv::Scalar(0));
   for (int y = 0; y < gray_img.rows; ++y) {
     for (int x = 0; x < gray_img.cols; x += 9) {
-      gray_img.at<char>(y, x) = 0;
-      gray_img.at<char>(y, x + 1) = 1;
-      gray_img.at<char>(y, x + 2) = 2;
-      gray_img.at<char>(y, x + 3) = 253;
-      gray_img.at<char>(y, x + 4) = 254;
-      gray_img.at<char>(y, x + 5) = 255;
-      gray_img.at<char>(y, x + 6) = 120;
-      gray_img.at<char>(y, x + 7) = 121;
-      gray_img.at<char>(y, x + 8) = 122;
+      gray_img.at<uchar>(y, x) = 0u;
+      gray_img.at<uchar>(y, x + 1) = 1u;
+      gray_img.at<uchar>(y, x + 2) = 2u;
+      gray_img.at<uchar>(y, x + 3) = 253u;
+      gray_img.at<uchar>(y, x + 4) = 254u;
+      gray_img.at<uchar>(y, x + 5) = 255u;
+      gray_img.at<uchar>(y, x + 6) = 120u;
+      gray_img.at<uchar>(y, x + 7) = 121u;
+      gray_img.at<uchar>(y, x + 8) = 122u;
     }
   }
   MultiClassOtsuUnit unit(gray_img, 3);
@@ -85,18 +85,18 @@ TEST_CASE("3_4_levels_gray_image") {
   cv::Mat gray_img(height, width, CV_8UC1, cv::Scalar(0));
   for (int y = 0; y < gray_img.rows; ++y) {
     for (int x = 0; x < gray_img.cols; x += 12) {
-      gray_img.at<char>(y, x) = 0;
-      gray_img.at<char>(y, x + 1) = 1;
-      gray_img.at<char>(y, x + 2) = 2;
-      gray_img.at<char>(y, x + 3) = 253;
-      gray_img.at<char>(y, x + 4) = 254;
-      gray_img.at<char>(y, x + 5) = 255;
-      gray_img.at<char>(y, x + 6) = 80;
-      gray_img.at<char>(y, x + 7) = 81;
-      gray_img.at<char>(y, x + 8) = 82;
-      gray_img.at<char>(y, x + 9) = 130;
-      gray_img.at<char>(y, x + 10) = 131;
-      gray_img.at<char>(y, x + 11) = 132;
+      gray_img.at<uchar>(y, x) = 0u;
+      gray_img.at<uchar>(y, x + 1) = 1u;
+      gray_img.at<uchar>(y, x + 2) = 2u;
+      gray_img.at<uchar>(y, x + 3) = 253u;
+      gray_img.at<uchar>(y, x + 4) = 254u;
+      gray_img.at<uchar>(y, x + 5) = 255u;
+      gray_img.at<uchar>(y, x + 6) = 80u;
+      gray_img.at<uchar>(y, x + 7) = 81u;
+      gray_img.at<uchar>(y, x + 8) = 82u;
+      gray_img.at<uchar>(y, x + 9) = 130u;
+      gray_img.at<uchar>(y, x + 10) = 131u;
+      gray_img.at<uchar>(y, x + 11) = 132u;
     }
   }
   MultiClassOtsuUnit unit(gray_img, 4);

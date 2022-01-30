@@ -8,11 +8,11 @@ void MultiClassOtsuUnit::CreateNormHistogram() {
   bool uniform = true, accumulate = false;
   cv::calcHist(&m_img, 1, 0, cv::Mat(), m_hist, 1, &hist_size, hist_range,
                uniform, accumulate);
-  double sum = 0.0;
-  for (size_t i = 0; i < m_hist.rows; i++) {
+  float sum = 0.0f;
+  for (int i = 0; i < m_hist.rows; i++) {
     sum += m_hist.at<float>(i);
   }
-  for (size_t i = 0; i < m_hist.rows; i++) {
+  for (int i = 0; i < m_hist.rows; i++) {
     m_hist.at<float>(i) /= sum;
   }
 }
@@ -21,9 +21,9 @@ void MultiClassOtsuUnit::GenerateAllPossibleThresholds(
     std::vector<std::vector<uchar>>& all_possible_thresholds,
     std::vector<uchar> thresholds, int level) {
   if (level >= m_levels - 1) return;
-  const size_t start = (0 == level) ? 0 : thresholds[level - 1];
+  const int start = (0 == level) ? 0 : thresholds[level - 1];
 
-  for (size_t i = start; i < 256; i++) {
+  for (int i = start; i < 256; i++) {
     thresholds[level] = i;
     GenerateAllPossibleThresholds(all_possible_thresholds, thresholds,
                                   level + 1);
@@ -122,11 +122,11 @@ void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
                                        cv::Mat& gray_img, cv::Mat& bin_img) {
   gray_img.copyTo(bin_img);
 
-  for (size_t y = 0; y < gray_img.rows; y++) {
-    for (size_t x = 0; x < gray_img.cols; x++) {
+  for (int y = 0; y < gray_img.rows; y++) {
+    for (int x = 0; x < gray_img.cols; x++) {
       int start = 0;
       int end = 0;
-      for (size_t cl_id = 0; cl_id <= m_levels; cl_id++) {
+      for (int cl_id = 0; cl_id <= m_levels; cl_id++) {
         if (thresholds.size() == cl_id)
           end = 255;
         else
