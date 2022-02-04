@@ -14,4 +14,7 @@ add_executable(binarization binarization_main.cpp)
 
 target_link_libraries(binarization ${OpenCV_LIBS} IMAGE_PROCESSING)
 
+enable_testing()
 add_subdirectory(image_processing)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/demo/ DESTINATION ${CMAKE_BINARY_DIR}/demo/)
