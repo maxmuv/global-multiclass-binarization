@@ -37,7 +37,7 @@ void ParseArguments(int argc, char** argv, AdditionalInfo& info) {
     }
   }
   if (((info.input_path.empty()) || (info.output_path.empty()) ||
-       (info.levels < 2) || (info.levels > 4)) &&
+       ((info.levels < 2) && (0 != info.levels)) || (info.levels > 4)) &&
       (info.file.empty()))
     throw std::runtime_error(
         "Use program:\n path/to/binarization_main -i path/to/gray/image -o "
@@ -55,7 +55,11 @@ int main(int argc, char** argv) {
       if (img.empty()) throw std::runtime_error("Cannot read input image");
       MultiClassOtsuUnit bin_unit(img, add_info.levels);
       cv::Mat bin;
-      bin_unit.Process(img, bin);
+      if (add_info.levels != 0) {
+        bin_unit.Process(img, bin);
+      } else {
+        img.copyTo(bin);
+      }
       cv::cvtColor(bin, bin, cv::COLOR_GRAY2BGR);
       if (!cv::imwrite(add_info.output_path, bin))
         throw std::runtime_error("Cannot save image");
@@ -70,7 +74,11 @@ int main(int argc, char** argv) {
         if (img.empty()) throw std::runtime_error("Cannot read input image");
         MultiClassOtsuUnit bin_unit(img, info.levels);
         cv::Mat bin;
-        bin_unit.Process(img, bin);
+        if (info.levels != 0) {
+          bin_unit.Process(img, bin);
+        } else {
+          img.copyTo(bin);
+        }
         cv::cvtColor(bin, bin, cv::COLOR_GRAY2BGR);
         if (!cv::imwrite(info.output_path, bin))
           throw std::runtime_error("Cannot save image");
