@@ -38,7 +38,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   std::vector<float> prob_distr(m_levels);
   int start = 0;
   int end = 0;
-  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
+  for (int cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
       end = 256;
     else
@@ -58,7 +58,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   start = 0;
   end = 0;
   std::vector<float> means(m_levels);
-  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
+  for (int cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
       end = 256;
     else
@@ -75,7 +75,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   start = 0;
   end = 0;
   std::vector<float> vars(m_levels);
-  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
+  for (int cl_id = 0; cl_id < m_levels; cl_id++) {
     if (cand_thresholds.size() == cl_id)
       end = 256;
     else
@@ -90,7 +90,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
     start = end;
   }
 
-  for (size_t cl_id = 0; cl_id < m_levels; cl_id++) {
+  for (int cl_id = 0; cl_id < m_levels; cl_id++) {
     i_var += prob_distr[cl_id] * vars[cl_id];
   }
 

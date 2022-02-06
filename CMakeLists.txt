@@ -18,3 +18,4 @@ enable_testing()
 add_subdirectory(image_processing)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/demo/ DESTINATION ${CMAKE_BINARY_DIR}/demo/)
+install(TARGETS binarization DESTINATION ${CMAKE_BINARY_DIR})
