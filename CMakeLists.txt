@@ -6,8 +6,12 @@ include_directories(thirdparty)
 
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(OpenCV REQUIRED)
-
+find_package(OpenCV 4.0 REQUIRED)
+if (OpenCV_FOUND)
+  message("OpenCV is found")
+else (OpenCV_FOUND)
+  message("OpenCV need to be installed to run the program")
+endif (OpenCV_FOUND)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)

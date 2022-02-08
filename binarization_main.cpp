@@ -45,7 +45,12 @@ void ParseArguments(int argc, char** argv, AdditionalInfo& info) {
         "/number/of/classes\nor\n path/to/binarization_main -f path/to/file");
 }
 
-// ToDo: const in class
+/** @brief App.
+* Usage:
+* binarization -i path\to\input\gray\image -o path\to\output\binarized\image -l levels
+* or
+* binarization -f path\to\file 
+*/
 int main(int argc, char** argv) {
   try {
     AdditionalInfo add_info;

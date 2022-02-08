@@ -26,21 +26,32 @@ class ImageProcessingUnit {
   ImageProcessingUnit(const ImageProcessingUnit&) = delete;
 };
 
+/**
+* @brief The MultiClassOtsuUnit class.
+* Это класс наследник ImageProcessingUnit. Он реализует мультиклассовый метод Оцу, 
+* который заключается в минимизации суммы мультиклассовой дисперсии. Класс хранит 
+* гистограмму исходного изображения, необходимую для вычислений.
+*/
 class MultiClassOtsuUnit : public ImageProcessingUnit {
  public:
   MultiClassOtsuUnit(const cv::Mat& img, const int levels)
       : ImageProcessingUnit(img, levels) {}
-
+  /// Метод, который бинаризует изображение, в нем имплементирован весь алгоритм.
   void Process(cv::Mat& gray_img, cv::Mat& bin_img) override;
+  /// Метод, создающий нормализованную гистограмму.
   void CreateNormHistogram();
+  /// Метод, который ищет наилучшую границу, с минимальной суммой внутриклассовой дисперсии.
   void SearchThresholds(std::vector<uchar>& thresholds, double& res_var);
+  /// Метод, который непосредственно бинаризует, то есть создает изображение с несколькими цветами по исходному с данными границами.
   void BinarizeImage(std::vector<uchar>& thresholds, cv::Mat& gray_img,
                      cv::Mat& bin_img);
 
  private:
+  /// Рекурсивный алгоритм генерации всевозможных порогов.
   void GenerateAllPossibleThresholds(
       std::vector<std::vector<uchar>>& all_possible_thresholds,
       std::vector<uchar> thresholds, int level);
+  /// Метод, подсчитывающий внутриклассувую дисперсию с данными порогами по гистограмме.
   void CalculateIntroClassVariance(float& var,
                                    const std::vector<uchar>& cand_thresholds);
 

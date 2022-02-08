@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "image_processing_unit.h"
 
+/// Test: a case with zero varience.
 TEST_CASE("n_levels_gray_image") {
   srand(100);
   int width = 400;
@@ -32,6 +33,7 @@ TEST_CASE("n_levels_gray_image") {
   }
 }
 
+/// Tests: with non-zero variance.
 TEST_CASE("3_2_levels_gray_image") {
   int width = 120;
   int height = 120;
@@ -107,6 +109,7 @@ TEST_CASE("3_4_levels_gray_image") {
   CHECK_EQ(var, doctest::Approx(2.0 / 3));
 }
 
+/// Test: histogram creation.
 TEST_CASE("create_norm_hist") {
   srand(15);
   int width = 100;
