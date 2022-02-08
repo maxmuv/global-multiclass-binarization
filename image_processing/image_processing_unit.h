@@ -3,6 +3,14 @@
 
 #include <opencv2/opencv.hpp>
 
+/**
+ * @brief The ImageProcessingUnit class.
+ * Это базовый класс для классов, которые бинаризуют серое изображение. Он имеет
+ * два метода: UpdateImage и Process. Process переопределяется
+ * классом-наследником для конкретной реализации алгоритма бинаризации. Данный
+ * класс содержит исходное изображение и количество классов.
+ */
+
 class ImageProcessingUnit {
  protected:
   ImageProcessingUnit(const cv::Mat& img, const int levels) : m_levels(levels) {
