@@ -19,7 +19,7 @@ void MultiClassOtsuUnit::CreateNormHistogram() {
 
 void MultiClassOtsuUnit::GenerateAllPossibleThresholds(
     std::vector<std::vector<uchar>>& all_possible_thresholds,
-    std::vector<uchar> thresholds, int level) {
+    std::vector<uchar> thresholds, int level) const {
   if (level >= m_levels - 1) return;
   const int start = (0 == level) ? 0 : thresholds[level - 1];
 
@@ -32,7 +32,7 @@ void MultiClassOtsuUnit::GenerateAllPossibleThresholds(
 }
 
 void MultiClassOtsuUnit::CalculateIntroClassVariance(
-    float& var, const std::vector<uchar>& cand_thresholds) {
+    float& var, const std::vector<uchar>& cand_thresholds) const {
   float i_var = 0.0;
 
   std::vector<float> prob_distr(m_levels);
@@ -99,7 +99,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
 
 // ToDo: Check that hist exist
 void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds,
-                                          double& res_var) {
+                                          double& res_var) const {
   std::vector<std::vector<uchar>> all_possible_thresholds;
   std::vector<uchar> thresholds_for_func(m_levels - 1);
   GenerateAllPossibleThresholds(all_possible_thresholds, thresholds_for_func,
@@ -119,7 +119,8 @@ void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds,
 }
 
 void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
-                                       cv::Mat& gray_img, cv::Mat& bin_img) {
+                                       cv::Mat& gray_img,
+                                       cv::Mat& bin_img) const {
   gray_img.copyTo(bin_img);
 
   for (int y = 0; y < gray_img.rows; y++) {
