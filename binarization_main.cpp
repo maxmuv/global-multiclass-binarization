@@ -66,9 +66,11 @@ int main(int argc, char** argv) {
       } else {
         img.copyTo(bin);
       }
-      cv::cvtColor(bin, bin, cv::COLOR_GRAY2BGR);
       if (!cv::imwrite(add_info.output_path, bin))
         throw std::runtime_error("Cannot save image");
+      std::unique_ptr<cv::Mat> histImage;
+      bin_unit.DrawHist(histImage);
+      cv::imwrite(add_info.output_path + "hist.jpg", *histImage.get());
     } else {
       std::string s;
       std::ifstream in(add_info.file);
@@ -85,9 +87,11 @@ int main(int argc, char** argv) {
         } else {
           img.copyTo(bin);
         }
-        cv::cvtColor(bin, bin, cv::COLOR_GRAY2BGR);
         if (!cv::imwrite(info.output_path, bin))
           throw std::runtime_error("Cannot save image");
+        std::unique_ptr<cv::Mat> histImage;
+        bin_unit.DrawHist(histImage);
+        cv::imwrite(info.output_path + "hist.jpg", *histImage.get());
         std::getline(in, s);
       }
     }

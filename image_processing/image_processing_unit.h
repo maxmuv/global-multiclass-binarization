@@ -48,6 +48,8 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
   /// несколькими цветами по исходному с данными границами.
   void BinarizeImage(std::vector<uchar>& thresholds, cv::Mat& gray_img,
                      cv::Mat& bin_img) const;
+  /// Метод, который визуализирует гистограмму
+  void DrawHist(std::unique_ptr<cv::Mat>& histImage) const;
 
  private:
   /// Рекурсивный алгоритм генерации всевозможных порогов.
@@ -61,6 +63,7 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
 
  public:
   cv::Mat m_hist;
+  std::vector<uchar> m_thrs;
 };
 
 #endif

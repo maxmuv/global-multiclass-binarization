@@ -118,27 +118,64 @@ void MultiClassOtsuUnit::SearchThresholds(std::vector<uchar>& thresholds,
   res_var = min;
 }
 
+/// According to tresholds and gray level this method choose a result color
+cv::Vec3b ChooseColor(const uchar bin, std::vector<uchar> thrs) {
+  thrs.emplace_back(255);
+  switch (thrs.size()) {
+    case 2:
+      if (bin <= thrs[0])
+        return cv::Vec3b(255, 0, 0);
+      else
+        return cv::Vec3b(0, 255, 0);
+      break;
+    case 3:
+      if (bin <= thrs[0])
+        return cv::Vec3b(255, 0, 0);
+      else if (bin <= thrs[1])
+        return cv::Vec3b(0, 255, 0);
+      else
+        return cv::Vec3b(0, 0, 255);
+      break;
+    case 4:
+      if (bin <= thrs[0])
+        return cv::Vec3b(255, 0, 0);
+      else if (bin <= thrs[1])
+        return cv::Vec3b(0, 255, 0);
+      else if (bin <= thrs[2])
+        return cv::Vec3b(0, 0, 255);
+      else
+        return cv::Vec3b(255, 255, 255);
+      break;
+    default:
+      throw std::runtime_error("too many thresholds\n");
+  }
+}
+
 void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
                                        cv::Mat& gray_img,
                                        cv::Mat& bin_img) const {
-  gray_img.copyTo(bin_img);
-
+  cv::cvtColor(gray_img, bin_img, cv::COLOR_GRAY2BGR);
   for (int y = 0; y < gray_img.rows; y++) {
     for (int x = 0; x < gray_img.cols; x++) {
-      int start = 0;
-      int end = 0;
-      for (int cl_id = 0; cl_id <= m_levels; cl_id++) {
-        if (thresholds.size() == cl_id)
-          end = 255;
-        else
-          end = thresholds[cl_id];
-        if ((start <= gray_img.at<uchar>(y, x)) &&
-            (gray_img.at<uchar>(y, x) <= end)) {
-          bin_img.at<uchar>(y, x) = cl_id * static_cast<int>(255 / m_levels);
-        }
-        start = end;
-      }
+      uchar val = gray_img.at<uchar>(y, x);
+      cv::Scalar color = ChooseColor(gray_img.at<uchar>(y, x), thresholds);
+      bin_img.at<cv::Vec3b>(y, x) =
+          ChooseColor(gray_img.at<uchar>(y, x), thresholds);
     }
+  }
+}
+
+void MultiClassOtsuUnit::DrawHist(std::unique_ptr<cv::Mat>& histImage) const {
+  int bin_w = static_cast<int>(1.0 * 256 / m_hist.rows);
+  int hist_h = 400;
+  histImage.reset(new cv::Mat(hist_h, 256, CV_8UC3, cv::Scalar(0, 0, 0)));
+  cv::Mat hist;
+  normalize(m_hist, hist, 0, histImage->rows, cv::NORM_MINMAX, -1, cv::Mat());
+  for (int i = 0; i < m_hist.rows; ++i) {
+    line(*histImage.get(),
+         cv::Point(bin_w * (i - 1), hist_h - cvRound(hist.at<float>(i - 1))),
+         cv::Point(bin_w * (i), hist_h - cvRound(hist.at<float>(i))),
+         cv::Scalar(ChooseColor(i, m_thrs)), 2, 8, 0);
   }
 }
 
@@ -147,5 +184,6 @@ void MultiClassOtsuUnit::Process(cv::Mat& gray_img, cv::Mat& bin_img) {
   std::vector<uchar> thrs;
   double var;
   SearchThresholds(thrs, var);
+  m_thrs = thrs;
   BinarizeImage(thrs, gray_img, bin_img);
 }
