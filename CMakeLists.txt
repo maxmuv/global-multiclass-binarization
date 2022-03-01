@@ -6,6 +6,13 @@ include_directories(thirdparty)
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(DRAWADD "key to draw hists and plots" ON)
+if (DRAWADD)
+  add_definitions(-Ddraw=1)
+else (DRAWADD)
+  add_definitions(-Ddraw=0)
+endif (DRAWADD)
+
 find_package(OpenCV 4.0 REQUIRED)
 if (OpenCV_FOUND)
   message("OpenCV is found")

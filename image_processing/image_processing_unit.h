@@ -50,6 +50,9 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
                      cv::Mat& bin_img) const;
   /// Метод, который визуализирует гистограмму
   void DrawHist(std::unique_ptr<cv::Mat>& histImage) const;
+  /// Метод для рисования графиков суммы дисперсии от значения одного из порогов
+  /// при фиксированных других
+  void DrawPlots(std::vector<std::unique_ptr<cv::Mat>>& plotsImage) const;
 
  private:
   /// Рекурсивный алгоритм генерации всевозможных порогов.
@@ -58,11 +61,14 @@ class MultiClassOtsuUnit : public ImageProcessingUnit {
       std::vector<uchar> thresholds, int level) const;
   /// Метод, подсчитывающий внутриклассувую дисперсию с данными порогами по
   /// гистограмме.
-  void CalculateIntroClassVariance(
-      float& var, const std::vector<uchar>& cand_thresholds) const;
+  void CalculateIntroClassVariance(float& var,
+                                   const std::vector<uchar>& cand_thresholds,
+                                   bool print = false) const;
 
  public:
   cv::Mat m_hist;
+  int m_min = 10000000;
+  int m_max = 0;
   std::vector<uchar> m_thrs;
 };
 

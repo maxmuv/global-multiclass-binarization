@@ -10,6 +10,9 @@ void MultiClassOtsuUnit::CreateNormHistogram() {
                uniform, accumulate);
   float sum = 0.0f;
   for (int i = 0; i < m_hist.rows; i++) {
+    float value = m_hist.at<float>(i);
+    if (value < m_min) m_min = value;
+    if (value > m_max) m_max = value;
     sum += m_hist.at<float>(i);
   }
   for (int i = 0; i < m_hist.rows; i++) {
@@ -32,7 +35,7 @@ void MultiClassOtsuUnit::GenerateAllPossibleThresholds(
 }
 
 void MultiClassOtsuUnit::CalculateIntroClassVariance(
-    float& var, const std::vector<uchar>& cand_thresholds) const {
+    float& var, const std::vector<uchar>& cand_thresholds, bool print) const {
   float i_var = 0.0;
 
   std::vector<float> prob_distr(m_levels);
@@ -71,6 +74,13 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
     }
     start = end;
   }
+  if (print) {
+    std::cout << "Info for image:" << std::endl;
+    for (int cl_id = 0; cl_id < m_levels; ++cl_id) {
+      std::cout << "Class " << std::to_string(cl_id)
+                << " - mean: " << std::to_string(means[cl_id]) << std::endl;
+    }
+  }
 
   start = 0;
   end = 0;
@@ -95,6 +105,10 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   }
 
   var = i_var;
+  if (print) {
+    std::cout << "Sum of introclass variance: " << std::to_string(var)
+              << std::endl;
+  }
 }
 
 // ToDo: Check that hist exist
@@ -168,14 +182,223 @@ void MultiClassOtsuUnit::BinarizeImage(std::vector<uchar>& thresholds,
 void MultiClassOtsuUnit::DrawHist(std::unique_ptr<cv::Mat>& histImage) const {
   int bin_w = static_cast<int>(1.0 * 256 / m_hist.rows);
   int hist_h = 400;
-  histImage.reset(new cv::Mat(hist_h, 256, CV_8UC3, cv::Scalar(0, 0, 0)));
+  int hist_x_begin = 50;
+  int hist_y_begin = 50;
+  histImage.reset(new cv::Mat(hist_y_begin + hist_h + 60, 256 + hist_x_begin,
+                              CV_8UC3, cv::Scalar(0, 0, 0)));
   cv::Mat hist;
-  normalize(m_hist, hist, 0, histImage->rows, cv::NORM_MINMAX, -1, cv::Mat());
+  normalize(m_hist, hist, 0, histImage->rows - 60 - hist_y_begin,
+            cv::NORM_MINMAX, -1, cv::Mat());
+  line(*histImage.get(),
+       cv::Point(hist_x_begin - 2, hist_y_begin + hist_h + 25),
+       cv::Point(256 + hist_x_begin, hist_y_begin + hist_h + 25),
+       cv::Scalar(255, 255, 255), 2, 8, 0);
+  putText(*histImage.get(), "x, gray level",
+          cv::Point(140, hist_y_begin + hist_h + 55), cv::FONT_HERSHEY_SIMPLEX,
+          0.25, cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
+  line(*histImage.get(), cv::Point(hist_x_begin - 2, 0),
+       cv::Point(hist_x_begin - 2, hist_y_begin + hist_h + 25),
+       cv::Scalar(255, 255, 255), 2, 8, 0);
+  putText(*histImage.get(), "y, amount", cv::Point(0, 10),
+          cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(255, 255, 255), 1,
+          cv::LINE_AA);
+  putText(*histImage.get(), "of pixels", cv::Point(0, 20),
+          cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(255, 255, 255), 1,
+          cv::LINE_AA);
+  int y_step = (m_max - m_min) / 10;
+  for (int i = m_min; i < m_max; i += y_step) {
+    line(*histImage.get(),
+         cv::Point(hist_x_begin - 5, hist_y_begin + hist_h -
+                                         cvRound(i * hist_h / (m_max - m_min))),
+         cv::Point(hist_x_begin, hist_y_begin + hist_h -
+                                     cvRound(i * hist_h / (m_max - m_min))),
+         cv::Scalar(255, 255, 255), 2, 8, 0);
+    putText(*histImage.get(), std::to_string(i),
+            cv::Point(0, hist_y_begin + hist_h -
+                             cvRound(i * hist_h / (m_max - m_min))),
+            cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+            cv::LINE_AA);
+  }
   for (int i = 0; i < m_hist.rows; ++i) {
     line(*histImage.get(),
-         cv::Point(bin_w * (i - 1), hist_h - cvRound(hist.at<float>(i - 1))),
-         cv::Point(bin_w * (i), hist_h - cvRound(hist.at<float>(i))),
+         cv::Point(hist_x_begin + bin_w * (i - 1),
+                   hist_y_begin + hist_h - cvRound(hist.at<float>(i - 1))),
+         cv::Point(hist_x_begin + bin_w * (i),
+                   hist_y_begin + hist_h - cvRound(hist.at<float>(i))),
          cv::Scalar(ChooseColor(i, m_thrs)), 2, 8, 0);
+    if (i % 30 == 0) {
+      std::string text = std::to_string(i);
+      switch (text.size()) {
+        case 1:
+          line(*histImage.get(),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 30),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 20),
+               cv::Scalar(255, 255, 255), 2, 8, 0);
+          putText(
+              *histImage.get(), text,
+              cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 45),
+              cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+              cv::LINE_AA);
+          break;
+        case 2:
+          line(*histImage.get(),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 30),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 20),
+               cv::Scalar(255, 255, 255), 2, 8, 0);
+          putText(*histImage.get(), text,
+                  cv::Point(hist_x_begin + i * bin_w - 8,
+                            hist_y_begin + hist_h + 45),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+                  cv::LINE_AA);
+          break;
+        case 3:
+          line(*histImage.get(),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 30),
+               cv::Point(hist_x_begin + i * bin_w, hist_y_begin + hist_h + 20),
+               cv::Scalar(255, 255, 255), 2, 8, 0);
+          putText(*histImage.get(), text,
+                  cv::Point(hist_x_begin + i * bin_w - 10,
+                            hist_y_begin + hist_h + 45),
+                  cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+                  cv::LINE_AA);
+          break;
+      }
+    }
+  }
+  float tmp = 0;
+  CalculateIntroClassVariance(tmp, m_thrs, true);
+}
+
+void MultiClassOtsuUnit::DrawPlots(
+    std::vector<std::unique_ptr<cv::Mat>>& plotsImage) const {
+  for (int th_id = 0; th_id < m_thrs.size(); th_id++) {
+    int begin = 0;
+    int end = 255;
+    if (th_id != 0) begin = m_thrs[th_id - 1];
+    if (th_id < m_thrs.size() - 1) end = m_thrs[th_id + 1];
+    if (end == begin) throw std::runtime_error("Something wrong");
+    int hist_w = 400;
+    int hist_h = 400;
+    int plot_x_begin = 50;
+    int plot_y_begin = 50;
+    plotsImage.emplace_back(new cv::Mat(hist_h + plot_y_begin + 60,
+                                        hist_w + plot_x_begin, CV_8UC3,
+                                        cv::Scalar(0, 0, 0)));
+    int min = 10000000;
+    int max = 0;
+    std::vector<float> vars;
+    for (int i = begin; i < end; ++i) {
+      float val;
+      std::vector<uchar> thrs = m_thrs;
+      thrs[th_id] = i;
+      CalculateIntroClassVariance(val, thrs);
+      if (val < min) min = val;
+      if (val > max) max = val;
+      vars.push_back(val);
+    }
+    line(*plotsImage.back().get(),
+         cv::Point(plot_x_begin - 2, plot_y_begin + hist_h + 25),
+         cv::Point(hist_w + plot_x_begin, plot_y_begin + hist_h + 25),
+         cv::Scalar(255, 255, 255), 2, 8, 0);
+    putText(*plotsImage.back().get(),
+            "x," + std::to_string(th_id + 1) + " threshold",
+            cv::Point(hist_w / 2 + plot_x_begin, plot_y_begin + hist_h + 55),
+            cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(255, 255, 255), 1,
+            cv::LINE_AA);
+    line(*plotsImage.back().get(), cv::Point(plot_x_begin - 2, 0),
+         cv::Point(plot_x_begin - 2, plot_y_begin + hist_h + 25),
+         cv::Scalar(255, 255, 255), 2, 8, 0);
+    putText(*plotsImage.back().get(), "intro-class", cv::Point(0, 10),
+            cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(255, 255, 255), 1,
+            cv::LINE_AA);
+    putText(*plotsImage.back().get(), "variance", cv::Point(0, 20),
+            cv::FONT_HERSHEY_SIMPLEX, 0.25, cv::Scalar(255, 255, 255), 1,
+            cv::LINE_AA);
+    int y_step = (max - min) / 10;
+    for (int i = min; i < max; i += y_step) {
+      line(*plotsImage.back().get(),
+           cv::Point(plot_x_begin - 5,
+                     plot_y_begin + hist_h -
+                         cvRound((i - min) * hist_h / (max - min))),
+           cv::Point(plot_x_begin,
+                     plot_y_begin + hist_h -
+                         cvRound((i - min) * hist_h / (max - min))),
+           cv::Scalar(255, 255, 255), 2, 8, 0);
+      putText(*plotsImage.back().get(), std::to_string(i),
+              cv::Point(0, plot_y_begin + hist_h -
+                               cvRound((i - min) * hist_h / (max - min))),
+              cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+              cv::LINE_AA);
+    }
+    float bin_w = 1.0 * hist_w / (end - begin);
+    for (int i = begin, j = 0; i < end - 1; ++i, ++j) {
+      line(*plotsImage.back().get(),
+           cv::Point(plot_x_begin +
+                         cvRound(1.0 * (i - begin) / (end - begin) * hist_w),
+                     plot_y_begin + hist_h -
+                         cvRound(1.0 * (vars[j] - min) / (max - min) * hist_h)),
+           cv::Point(
+               plot_x_begin +
+                   cvRound(1.0 * (i + 1 - begin) / (end - begin) * hist_w),
+               plot_y_begin + hist_h -
+                   cvRound(1.0 * (vars[j + 1] - min) / (max - min) * hist_h)),
+           cv::Scalar(255, 255, 255), 2, 8, 0);
+      if (i % 30 == 0) {
+        std::string text = std::to_string(i);
+        switch (text.size()) {
+          case 1:
+            line(*plotsImage.back().get(),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 30),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 20),
+                 cv::Scalar(255, 255, 255), 2, 8, 0);
+            putText(*plotsImage.back().get(), text,
+                    cv::Point(plot_x_begin + cvRound(j * bin_w),
+                              plot_y_begin + hist_h + 45),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+                    cv::LINE_AA);
+            break;
+          case 2:
+            line(*plotsImage.back().get(),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 30),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 20),
+                 cv::Scalar(255, 255, 255), 2, 8, 0);
+            putText(*plotsImage.back().get(), text,
+                    cv::Point(plot_x_begin + cvRound(j * bin_w) - 8,
+                              plot_y_begin + hist_h + 45),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+                    cv::LINE_AA);
+            break;
+          case 3:
+            line(*plotsImage.back().get(),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 30),
+                 cv::Point(plot_x_begin + cvRound(j * bin_w),
+                           plot_y_begin + hist_h + 20),
+                 cv::Scalar(255, 255, 255), 2, 8, 0);
+            putText(*plotsImage.back().get(), text,
+                    cv::Point(plot_x_begin + cvRound(j * bin_w) - 10,
+                              plot_y_begin + hist_h + 45),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 255, 255), 1,
+                    cv::LINE_AA);
+            break;
+        }
+      }
+    }
+    float val;
+    CalculateIntroClassVariance(val, m_thrs);
+    for (int i = 0; i < 5; ++i) {
+      cv::circle(
+          *plotsImage.back().get(),
+          cv::Point(plot_x_begin + cvRound(1.0 * (m_thrs[th_id] - begin) /
+                                           (end - begin) * hist_w),
+                    plot_y_begin + hist_h -
+                        cvRound(1.0 * (val - min) / (max - min) * hist_h)),
+          i, cv::Scalar(255, 0, 0));
+    }
   }
 }
 

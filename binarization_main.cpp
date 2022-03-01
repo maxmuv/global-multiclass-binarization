@@ -68,11 +68,23 @@ int main(int argc, char** argv) {
       }
       if (!cv::imwrite(add_info.output_path, bin))
         throw std::runtime_error("Cannot save image");
+#if draw
       if (add_info.levels != 0) {
         std::unique_ptr<cv::Mat> histImage;
         bin_unit.DrawHist(histImage);
         cv::imwrite(add_info.output_path + "hist.jpg", *histImage.get());
+        std::vector<std::unique_ptr<cv::Mat>> plots;
+        bin_unit.DrawPlots(plots);
+        int i = 0;
+        for (const auto& plot : plots) {
+          ++i;
+          cv::imwrite(add_info.output_path + std::to_string(i) + "thr.jpg",
+                      *plot.get());
+        }
       }
+#else
+      std::cout << "CMake option DRAWADD is false" << std::endl;
+#endif
     } else {
       std::string s;
       std::ifstream in(add_info.file);
@@ -91,14 +103,27 @@ int main(int argc, char** argv) {
         }
         if (!cv::imwrite(info.output_path, bin))
           throw std::runtime_error("Cannot save image");
+#if draw
         if (info.levels != 0) {
           std::unique_ptr<cv::Mat> histImage;
           bin_unit.DrawHist(histImage);
           cv::imwrite(info.output_path + "hist.jpg", *histImage.get());
+          std::vector<std::unique_ptr<cv::Mat>> plots;
+          bin_unit.DrawPlots(plots);
+          int i = 0;
+          for (const auto& plot : plots) {
+            ++i;
+            cv::imwrite(info.output_path + std::to_string(i) + "thr.jpg",
+                        *plot.get());
+          }
         }
+#else
+        std::cout << "CMake option DRAWADD is false" << std::endl;
+#endif
         std::getline(in, s);
       }
     }
+    std::cout << "Done!" << std::endl;
   } catch (std::exception& w) {
     std::cout << w.what();
   } catch (...) {
