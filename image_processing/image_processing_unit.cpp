@@ -78,7 +78,8 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
     std::cout << "Info for image:" << std::endl;
     for (int cl_id = 0; cl_id < m_levels; ++cl_id) {
       std::cout << "Class " << std::to_string(cl_id)
-                << " - mean: " << std::to_string(means[cl_id]) << std::endl;
+                << " - expected value: " << std::to_string(means[cl_id])
+                << std::endl;
     }
   }
 
@@ -101,13 +102,16 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
   }
 
   for (int cl_id = 0; cl_id < m_levels; cl_id++) {
-    i_var += prob_distr[cl_id] * vars[cl_id];
+    float val = prob_distr[cl_id] * vars[cl_id];
+    if (print)
+      std::cout << "Class " << std::to_string(cl_id)
+                << " - variance: " << std::to_string(val) << std::endl;
+    i_var += val;
   }
 
   var = i_var;
   if (print) {
-    std::cout << "Sum of introclass variance: " << std::to_string(var)
-              << std::endl;
+    std::cout << "Introclass variance: " << std::to_string(var) << std::endl;
   }
 }
 
@@ -408,5 +412,8 @@ void MultiClassOtsuUnit::Process(cv::Mat& gray_img, cv::Mat& bin_img) {
   double var;
   SearchThresholds(thrs, var);
   m_thrs = thrs;
+  for (int i = 0; i < thrs.size(); ++i)
+    std::cout << "Threshold " << i + 1 << " : " << static_cast<int>(thrs[i])
+              << std::endl;
   BinarizeImage(thrs, gray_img, bin_img);
 }

@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
       }
       if (!cv::imwrite(add_info.output_path, bin))
         throw std::runtime_error("Cannot save image");
+      std::cout << add_info.input_path << std::endl;
 #if draw
       if (add_info.levels != 0) {
         std::unique_ptr<cv::Mat> histImage;
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
         }
         if (!cv::imwrite(info.output_path, bin))
           throw std::runtime_error("Cannot save image");
+        std::cout << info.input_path << std::endl;
 #if draw
         if (info.levels != 0) {
           std::unique_ptr<cv::Mat> histImage;
