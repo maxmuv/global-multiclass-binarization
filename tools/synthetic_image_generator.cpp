@@ -7,7 +7,7 @@ void CreateImage(int n, std::unique_ptr<cv::Mat> &synthetic_image) {
   std::vector<int> exp_value = {85, 100, 115, 130};
   for (int i = 0; i < n; ++i) {
     mersenne_tw_engines.emplace_back(i);
-    uni_distrs.emplace_back(0, 3);
+    uni_distrs.emplace_back(0, 4);
   }
   for (int y = 0; y < synthetic_image.get()->rows; ++y) {
     int i = y / (synthetic_image.get()->rows / n + 1);

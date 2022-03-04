@@ -105,7 +105,7 @@ void MultiClassOtsuUnit::CalculateIntroClassVariance(
     float val = prob_distr[cl_id] * vars[cl_id];
     if (print)
       std::cout << "Class " << std::to_string(cl_id)
-                << " - variance: " << std::to_string(val) << std::endl;
+                << " - variance: " << std::to_string(vars[cl_id]) << std::endl;
     i_var += val;
   }
 
