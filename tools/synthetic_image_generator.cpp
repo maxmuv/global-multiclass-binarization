@@ -3,20 +3,21 @@
 
 void CreateImage(int n, std::unique_ptr<cv::Mat> &synthetic_image) {
   std::vector<std::mt19937> mersenne_tw_engines;
-  std::vector<std::uniform_int_distribution<>> uni_distrs;
+  std::vector<std::normal_distribution<>> uni_distrs;
   std::vector<int> exp_value = {85, 100, 115, 130};
   for (int i = 0; i < n; ++i) {
     mersenne_tw_engines.emplace_back(i);
-    uni_distrs.emplace_back(-10, 10);
+    uni_distrs.emplace_back(0, 3);
   }
   for (int y = 0; y < synthetic_image.get()->rows; ++y) {
-    for (int x = 0; x < synthetic_image.get()->cols;) {
-      for (int i = 0; i < n; ++i) {
-        synthetic_image.get()->at<uchar>(x, y) =
-            exp_value[i] + (uni_distrs[i])(mersenne_tw_engines[i]);
-        ++x;
-        if (synthetic_image.get()->cols <= x) break;
-      }
+    int i = y / (synthetic_image.get()->rows / n + 1);
+    std::vector<uchar> vals;
+    for (int x = 0; x < synthetic_image.get()->cols; ++x) {
+      vals.push_back(exp_value[i] + (uni_distrs[i])(mersenne_tw_engines[i]));
+    }
+    std::stable_sort(vals.begin(), vals.end());
+    for (int x = 0; x < synthetic_image.get()->cols; ++x) {
+      synthetic_image.get()->at<uchar>(x, y) = vals[x];
     }
   }
 }
