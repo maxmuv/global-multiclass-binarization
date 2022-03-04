@@ -45,6 +45,7 @@ endif (DOXYGEN_FOUND)
 
 enable_testing()
 add_subdirectory(image_processing)
+add_subdirectory(tools)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/demo/ DESTINATION ${CMAKE_BINARY_DIR}/demo/)
 install(TARGETS binarization DESTINATION ${CMAKE_BINARY_DIR})
