@@ -15,7 +15,7 @@ void CreateImage(int n, std::unique_ptr<cv::Mat> &synthetic_image) {
     for (int x = 0; x < synthetic_image.get()->cols; ++x) {
       vals.push_back(exp_value[i] + (uni_distrs[i])(mersenne_tw_engines[i]));
     }
-    std::stable_sort(vals.begin(), vals.end());
+    // std::stable_sort(vals.begin(), vals.end());
     for (int x = 0; x < synthetic_image.get()->cols; ++x) {
       synthetic_image.get()->at<uchar>(x, y) = vals[x];
     }
